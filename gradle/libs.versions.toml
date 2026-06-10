@@ -1,0 +1,43 @@
+[versions]
+# Kotlin / Build
+agp                       = "8.7.3"
+kotlin                    = "2.0.21"
+kotlinxSerialization      = "1.7.3"
+kotlinxCoroutines         = "1.9.0"
+
+# Networking
+okhttp                    = "4.12.0"
+
+# Android
+androidxAnnotation        = "1.9.1"
+
+# Publishing / Docs
+mavenPublish              = "0.30.0"
+dokka                     = "1.9.20"
+
+# Testing
+junit                     = "4.13.2"
+truth                     = "1.4.4"
+robolectric               = "4.13"
+androidxTestCore          = "1.6.1"
+
+[libraries]
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+kotlinx-coroutines-core    = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+okhttp                     = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+androidx-annotation        = { group = "androidx.annotation", name = "annotation", version.ref = "androidxAnnotation" }
+
+# Test
+kotlinx-coroutines-test    = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+junit                      = { group = "junit", name = "junit", version.ref = "junit" }
+truth                      = { group = "com.google.truth", name = "truth", version.ref = "truth" }
+robolectric                = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+androidx-test-core         = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
+
+[plugins]
+android-library            = { id = "com.android.library",                       version.ref = "agp" }
+kotlin-android             = { id = "org.jetbrains.kotlin.android",              version.ref = "kotlin" }
+kotlin-serialization       = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+maven-publish              = { id = "com.vanniktech.maven.publish",              version.ref = "mavenPublish" }
+dokka                      = { id = "org.jetbrains.dokka",                       version.ref = "dokka" }
