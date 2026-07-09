@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        The NodeDa SDK talks to https://api.nodeda.com (unified API gateway).
+        We declare INTERNET here so the manifest merger automatically grants it
+        to consuming apps; you can override it in your own manifest if needed.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+</manifest>

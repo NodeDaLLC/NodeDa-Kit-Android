@@ -20,6 +20,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "nrova-android"
+rootProject.name = "nodeda-android"
 
-include(":nrova")
+include(":nodeda")

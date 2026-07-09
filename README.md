@@ -1,21 +1,21 @@
-# Nrova Android
+# NodeDa Android
 
-**Current version: `1.0`** &nbsp;·&nbsp; available at runtime as `Nrova.VERSION`.
+**Current version: `1.1`** &nbsp;·&nbsp; available at runtime as `NodeDa.VERSION`.
 
-The official Android/Kotlin SDK for the **Nrova** HTTP APIs. One typed
-client, one auth scheme, every public service Nrova exposes — built on
+The official Android/Kotlin SDK for the **NodeDa** HTTP APIs. One typed
+client, one auth scheme, every public service NodeDa exposes — built on
 Kotlin coroutines, `kotlinx.serialization`, and OkHttp. Mirrors the
-[Nrova Swift package](./Nrova%20Swift/) API for API parity across iOS
+[NodeDa Swift package](./NodeDa%20Swift/) API for API parity across iOS
 and Android apps.
 
 ```kotlin
-import com.nrova.sdk.NrovaClient
-import com.nrova.sdk.distribution.DistributionChannel
-import com.nrova.sdk.distribution.DistributionPlatform
+import com.nodeda.sdk.NodeDaClient
+import com.nodeda.sdk.distribution.DistributionChannel
+import com.nodeda.sdk.distribution.DistributionPlatform
 
-// Reads `com.nrova.sdk.ApiKey` and (optional) `com.nrova.sdk.OrganizationId`
+// Reads `com.nodeda.sdk.ApiKey` and (optional) `com.nodeda.sdk.OrganizationId`
 // from your AndroidManifest.xml.
-val client = NrovaClient.fromManifest(context)
+val client = NodeDaClient.fromManifest(context)
 
 val latest = client.distribution.latest(
     appId = "acme-notes",
@@ -23,7 +23,7 @@ val latest = client.distribution.latest(
     channel = DistributionChannel.STABLE,
 )
 println("Latest version: ${latest.artifact.version ?: latest.release.version}")
-println("SDK version: ${Nrova.VERSION}") // "1.0"
+println("SDK version: ${NodeDa.VERSION}") // "1.1"
 ```
 
 ## Table of contents
@@ -58,15 +58,15 @@ println("SDK version: ${Nrova.VERSION}") // "1.0"
 
 |                     |                                                |
 | ------------------- | ---------------------------------------------- |
-| **SDK version**     | `1.0`                                          |
-| **Runtime constant**| `com.nrova.sdk.Nrova.VERSION`                  |
+| **SDK version**     | `1.1`                                          |
+| **Runtime constant**| `com.nodeda.sdk.NodeDa.VERSION`                  |
 | **Schema**          | `nrova.distribution.v1` (Distribution API)     |
 
-`Nrova.VERSION` is updated in lockstep with the released git tag — log it
+`NodeDa.VERSION` is updated in lockstep with the released git tag — log it
 at startup to make support tickets easier to triage:
 
 ```kotlin
-Log.i("NrovaApp", "Nrova SDK ${Nrova.VERSION} booted")
+Log.i("NodeDaApp", "NodeDa SDK ${NodeDa.VERSION} booted")
 ```
 
 ## Requirements
@@ -79,7 +79,7 @@ Log.i("NrovaApp", "Nrova SDK ${Nrova.VERSION} booted")
 | Kotlin           | 2.0+                                         |
 | Android Gradle Plugin | 8.3+                                    |
 
-No third-party Nrova dependencies — only OkHttp, kotlinx-serialization,
+No third-party NodeDa dependencies — only OkHttp, kotlinx-serialization,
 and kotlinx-coroutines, all of which are standard on modern Android
 projects.
 
@@ -88,7 +88,7 @@ projects.
 The library is published as a single Maven artifact:
 
 ```text
-com.nrova:nrova-android:1.0
+com.nodeda:nodeda-android:1.1
 ```
 
 ### Gradle (Kotlin DSL — `build.gradle.kts`)
@@ -100,7 +100,7 @@ dependency on your app module:
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("com.nrova:nrova-android:1.0")
+    implementation("com.nodeda:nodeda-android:1.1")
 }
 ```
 
@@ -108,7 +108,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.nrova:nrova-android:1.0'
+    implementation 'com.nodeda:nodeda-android:1.1'
 }
 ```
 
@@ -116,15 +116,15 @@ dependencies {
 
 ```toml
 [versions]
-nrova = "1.0"
+nodeda = "1.1"
 
 [libraries]
-nrova-android = { group = "com.nrova", name = "nrova-android", version.ref = "nrova" }
+nodeda-android = { group = "com.nodeda", name = "nodeda-android", version.ref = "nodeda" }
 ```
 
 ```kotlin
 dependencies {
-    implementation(libs.nrova.android)
+    implementation(libs.nodeda.android)
 }
 ```
 
@@ -140,7 +140,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven {
-            url = uri("https://maven.pkg.github.com/OWNER/Nrova-Android")
+            url = uri("https://maven.pkg.github.com/OWNER/NodeDa-Kit-Android")
             credentials {
                 username = providers.gradleProperty("gpr.user").orNull
                     ?: System.getenv("GITHUB_ACTOR")
@@ -162,15 +162,15 @@ In your app's `AndroidManifest.xml`:
 
 ```xml
 <application
-    android:name=".NrovaApp"
+    android:name=".NodeDaApp"
     …>
 
     <meta-data
-        android:name="com.nrova.sdk.ApiKey"
-        android:value="@string/nrova_api_key" />
+        android:name="com.nodeda.sdk.ApiKey"
+        android:value="@string/nodeda_api_key" />
     <meta-data
-        android:name="com.nrova.sdk.OrganizationId"
-        android:value="@string/nrova_org_id" />
+        android:name="com.nodeda.sdk.OrganizationId"
+        android:value="@string/nodeda_org_id" />
 
 </application>
 ```
@@ -185,8 +185,8 @@ android {
         val props = Properties().apply {
             rootProject.file("local.properties").takeIf(File::exists)?.let { load(it.inputStream()) }
         }
-        resValue("string", "nrova_api_key", props.getProperty("nrova.apiKey", ""))
-        resValue("string", "nrova_org_id",  props.getProperty("nrova.orgId",  ""))
+        resValue("string", "nodeda_api_key", props.getProperty("nodeda.apiKey", ""))
+        resValue("string", "nodeda_org_id",  props.getProperty("nodeda.orgId",  ""))
     }
 }
 ```
@@ -194,13 +194,13 @@ android {
 Then in your `Application` subclass:
 
 ```kotlin
-class NrovaApp : Application() {
-    lateinit var nrova: NrovaClient
+class NodeDaApp : Application() {
+    lateinit var nodeda: NodeDaClient
         private set
 
     override fun onCreate() {
         super.onCreate()
-        nrova = NrovaClient.fromManifest(this)
+        nodeda = NodeDaClient.fromManifest(this)
     }
 }
 ```
@@ -208,9 +208,9 @@ class NrovaApp : Application() {
 If you'd rather hand-construct the configuration you can do that too:
 
 ```kotlin
-val client = NrovaClient(
-    apiKey = BuildConfig.NROVA_API_KEY,
-    organizationId = BuildConfig.NROVA_ORG_ID,
+val client = NodeDaClient(
+    apiKey = BuildConfig.NODEDA_API_KEY,
+    organizationId = BuildConfig.NODEDA_ORG_ID,
 )
 ```
 
@@ -222,12 +222,14 @@ Every authenticated request sends both:
 - `X-API-Key: <apiKey>`
 
 …matching the Swift SDK exactly. The `health()` endpoint on every
-service is unauthenticated and never carries the headers.
+service is unauthenticated and never carries the headers. Production
+traffic uses the unified gateway at `https://api.nodeda.com` (paths
+unchanged under `/v1/organizations/{orgId}/…`).
 
 ## Top-level client
 
 ```kotlin
-val client = NrovaClient(apiKey = "sk_live_…")
+val client = NodeDaClient(apiKey = "sk_live_…")
 
 client.distribution      // DistributionService
 client.support           // SupportService
@@ -357,34 +359,34 @@ privacy.sections.forEach { println(it.title) }
 
 ## Error handling
 
-`NrovaError` is a sealed exception hierarchy — catch the specific
-subtype you care about, or the parent `NrovaError` to handle them all:
+`NodeDaError` is a sealed exception hierarchy — catch the specific
+subtype you care about, or the parent `NodeDaError` to handle them all:
 
 | Type | Thrown when |
 | --- | --- |
-| `NrovaError.Api` | Server returned a non-2xx status with a JSON `{error,message,details}` envelope. The `error.code` and `error.status` match the documented slugs (`invalid_api_key`, `not_found`, …). |
-| `NrovaError.Transport` | The underlying OkHttp / network layer threw. `cause` is the original `IOException`. |
-| `NrovaError.Decoding` | A 2xx response had a body the SDK could not decode against the declared model. `data` holds the raw bytes for debugging. |
-| `NrovaError.UnexpectedStatus` | Non-2xx response that did not carry a recognized JSON error envelope. |
-| `NrovaError.InvalidUrl` | A URL could not be constructed from the provided inputs (programmer error). |
+| `NodeDaError.Api` | Server returned a non-2xx status with a JSON `{error,message,details}` envelope. The `error.code` and `error.status` match the documented slugs (`invalid_api_key`, `not_found`, …). |
+| `NodeDaError.Transport` | The underlying OkHttp / network layer threw. `cause` is the original `IOException`. |
+| `NodeDaError.Decoding` | A 2xx response had a body the SDK could not decode against the declared model. `data` holds the raw bytes for debugging. |
+| `NodeDaError.UnexpectedStatus` | Non-2xx response that did not carry a recognized JSON error envelope. |
+| `NodeDaError.InvalidUrl` | A URL could not be constructed from the provided inputs (programmer error). |
 
 ```kotlin
 try {
     client.distribution.listApplications()
-} catch (e: NrovaError.Api) {
+} catch (e: NodeDaError.Api) {
     when (e.error.code) {
         "invalid_api_key" -> showAuthError()
         "not_found"       -> showEmptyState()
         else              -> showGenericError(e.error.message)
     }
-} catch (e: NrovaError.Transport) {
+} catch (e: NodeDaError.Transport) {
     showOfflineState()
 }
 ```
 
 ## Custom transports & testing
 
-The HTTP layer goes through a `NrovaTransport` interface so you can
+The HTTP layer goes through a `NodeDaTransport` interface so you can
 swap in canned responses for unit tests, instrument outgoing requests,
 or use a custom OkHttp configuration (interceptors, certificate
 pinning, custom DNS):
@@ -394,15 +396,15 @@ val pinned = OkHttpClient.Builder()
     .certificatePinner(CertificatePinner.Builder().add("…", "sha256/…").build())
     .build()
 
-val client = NrovaClient(
+val client = NodeDaClient(
     apiKey = "sk_live_…",
     transport = OkHttpTransport(pinned),
 )
 ```
 
 Unit tests can use the SDK's `MockTransport` (in `src/test`) directly,
-or roll their own implementation of `NrovaTransport`. See
-[`nrova/src/test/kotlin/com/nrova/sdk/NrovaClientTest.kt`](./nrova/src/test/kotlin/com/nrova/sdk/NrovaClientTest.kt)
+or roll their own implementation of `NodeDaTransport`. See
+[`nodeda/src/test/kotlin/com/nodeda/sdk/NodeDaClientTest.kt`](./nodeda/src/test/kotlin/com/nodeda/sdk/NodeDaClientTest.kt)
 for ready-to-copy examples.
 
 ## Configuration reference
@@ -410,8 +412,8 @@ for ready-to-copy examples.
 | Property         | Default                                                | Notes                                                                 |
 | ---------------- | ------------------------------------------------------ | --------------------------------------------------------------------- |
 | `apiKey`         | _required_                                             | Bearer + `X-API-Key`.                                                 |
-| `organizationId` | `NrovaConfiguration.DEFAULT_ORGANIZATION_ID`           | **Decoy** — production apps must override via manifest or constructor.|
-| `endpoints`      | `ServiceEndpoints.production`                          | Override to point at staging or a proxy.                              |
+| `organizationId` | `NodeDaConfiguration.DEFAULT_ORGANIZATION_ID` (`C1IRXJbknvZSTKMBxLDQ`) | Override via manifest or constructor for other tenants. |
+| `endpoints`      | `ServiceEndpoints.production` (`https://api.nodeda.com`) | Unified gateway; override to point at staging or a proxy. |
 | `defaultHeaders` | `emptyMap()`                                           | Added to every request.                                               |
 | `timeout`        | `30.seconds`                                           | Wraps every request — used when you bring your own `OkHttpClient`.    |
 
@@ -419,22 +421,22 @@ for ready-to-copy examples.
 
 ```
 .
-├── settings.gradle.kts          ← includes the :nrova module
+├── settings.gradle.kts          ← includes the :nodeda module
 ├── build.gradle.kts             ← root project (plugins only)
 ├── gradle.properties            ← Maven coordinates, POM metadata
 ├── gradle/
 │   ├── libs.versions.toml       ← version catalog
 │   └── wrapper/gradle-wrapper.properties
-├── nrova/                       ← the published Android library module
+├── nodeda/                       ← the published Android library module
 │   ├── build.gradle.kts         ← com.android.library + maven-publish config
 │   ├── consumer-rules.pro       ← R8 rules applied to consumer apps
 │   ├── proguard-rules.pro
 │   └── src/
 │       ├── main/
 │       │   ├── AndroidManifest.xml
-│       │   └── kotlin/com/nrova/sdk/
-│       │       ├── NrovaClient.kt
-│       │       ├── core/        ← HttpClient, NrovaError, transports, …
+│       │   └── kotlin/com/nodeda/sdk/
+│       │       ├── NodeDaClient.kt
+│       │       ├── core/        ← HttpClient, NodeDaError, transports, …
 │       │       ├── distribution/
 │       │       ├── support/
 │       │       ├── sales/
@@ -443,11 +445,11 @@ for ready-to-copy examples.
 │       │       ├── featureflags/
 │       │       ├── systemstatus/
 │       │       └── legal/
-│       └── test/kotlin/com/nrova/sdk/
+│       └── test/kotlin/com/nodeda/sdk/
 │           ├── MockTransport.kt
-│           └── NrovaClientTest.kt
+│           └── NodeDaClientTest.kt
 ├── samples/Usage.kt             ← illustrative consumer-side usage
-├── Nrova Swift/                 ← reference iOS/Swift package (do not edit)
+├── NodeDa Swift/                 ← reference iOS/Swift package (do not edit)
 └── README.md
 ```
 
@@ -461,17 +463,17 @@ once and then everything Just Works:
 gradle wrapper --gradle-version 8.10.2 --distribution-type bin
 
 # 2. Build the library
-./gradlew :nrova:assembleRelease
+./gradlew :nodeda:assembleRelease
 
 # 3. Run unit tests
-./gradlew :nrova:test
+./gradlew :nodeda:test
 
-# 4. Generate KDoc HTML to nrova/build/dokka
-./gradlew :nrova:dokkaHtml
+# 4. Generate KDoc HTML to nodeda/build/dokka
+./gradlew :nodeda:dokkaHtml
 ```
 
 The release AAR ends up at
-`nrova/build/outputs/aar/nrova-release.aar`.
+`nodeda/build/outputs/aar/nodeda-release.aar`.
 
 ## Publishing releases
 
@@ -484,10 +486,10 @@ GPG, and produces sources + Javadoc jars. Three one-time setup steps:
 Edit `gradle.properties`:
 
 ```properties
-VERSION_NAME=1.1.0
+VERSION_NAME=1.2.0
 ```
 
-`Nrova.VERSION` is regenerated automatically at build time so the
+`NodeDa.VERSION` is regenerated automatically at build time so the
 runtime constant cannot drift from the artifact coordinate.
 
 ### 2. Configure publishing credentials
@@ -514,22 +516,22 @@ signingInMemoryKeyPassword=your-gpg-passphrase
 
 ```bash
 # Stage to Central Portal then release automatically once validated.
-./gradlew :nrova:publishToMavenCentral
+./gradlew :nodeda:publishToMavenCentral
 
 # (or, to dry-run locally first)
-./gradlew :nrova:publishToMavenLocal
+./gradlew :nodeda:publishToMavenLocal
 ```
 
 Tag the commit and push:
 
 ```bash
-git tag -a v1.1.0 -m "Release 1.1.0"
-git push origin v1.1.0
+git tag -a v1.2.0 -m "Release 1.2.0"
+git push origin v1.2.0
 ```
 
 ### Publishing to GitHub Packages instead
 
-Replace the Central Portal config in `nrova/build.gradle.kts` with a
+Replace the Central Portal config in `nodeda/build.gradle.kts` with a
 GitHub Packages target — only the publishing block changes:
 
 ```kotlin
@@ -537,7 +539,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/Nrova-LLC/Nrova-Android")
+            url = uri("https://maven.pkg.github.com/NodeDaLLC/NodeDa-Kit-Android")
             credentials {
                 username = providers.gradleProperty("gpr.user").orNull
                     ?: System.getenv("GITHUB_ACTOR")
@@ -549,7 +551,7 @@ publishing {
 }
 ```
 
-…then run `./gradlew :nrova:publishReleasePublicationToGitHubPackagesRepository`.
+…then run `./gradlew :nodeda:publishReleasePublicationToGitHubPackagesRepository`.
 
 ## Versioning
 
@@ -561,13 +563,13 @@ The library follows **semantic versioning** (`MAJOR.MINOR.PATCH`):
 | MINOR | New endpoints, new optional parameters, new convenience APIs. |
 | PATCH | Bug fixes, dependency bumps, documentation.                   |
 
-The Maven coordinate (`com.nrova:nrova-android`), the
-`Nrova.VERSION` constant, and the git tag (`vX.Y.Z`) are bumped
+The Maven coordinate (`com.nodeda:nodeda-android`), the
+`NodeDa.VERSION` constant, and the git tag (`vX.Y.Z`) are bumped
 together. Use `1.x` constraints in consuming apps to stay on a single
 major:
 
 ```kotlin
-implementation("com.nrova:nrova-android:1.+") // any 1.x release
+implementation("com.nodeda:nodeda-android:1.+") // any 1.x release
 ```
 
 ## SPM ↔ Gradle: what to know
