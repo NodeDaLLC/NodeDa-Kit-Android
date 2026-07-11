@@ -43,6 +43,7 @@ println("SDK version: ${NodeDa.VERSION}") // "1.1"
   - [Feature Flags API](#feature-flags-api)
   - [System Status API](#system-status-api)
   - [Legal Policies API](#legal-policies-api)
+  - [LLM Hub API](#llm-hub-api)
 - [Error handling](#error-handling)
 - [Custom transports & testing](#custom-transports--testing)
 - [Configuration reference](#configuration-reference)
@@ -239,6 +240,7 @@ client.newsroom          // NewsroomService
 client.featureFlags      // FeatureFlagsService
 client.systemStatus      // SystemStatusService
 client.legal             // LegalService
+client.llmHub            // LLMHubService
 ```
 
 All service methods are `suspend` — call them from a coroutine scope
@@ -253,7 +255,7 @@ viewModelScope.launch {
 }
 ```
 
-`healthAll()` issues the eight `GET /health` requests in parallel using
+`healthAll()` issues the nine `GET /health` requests in parallel using
 `coroutineScope { async { … } }` (Kotlin equivalent of Swift's
 `withThrowingTaskGroup`).
 
@@ -357,6 +359,34 @@ val privacy = client.legal.getPolicyByKey(LegalPolicyKey.PRIVACY)
 privacy.sections.forEach { println(it.title) }
 ```
 
+### LLM Hub API
+
+OpenAI-compatible chat completions via the Vertex LLM Hub gateway
+(Nrova Gemini + optional BYO routing). Requires a developer API key with
+the `llm:invoke` scope (`LLMHubScope.INVOKE`). Omit `model` to use the
+org’s configured default; catalog ids live on `LLMHubModelID`.
+
+```kotlin
+val completion = client.llmHub.createChatCompletion(
+    ChatCompletionRequest(
+        messages = listOf(
+            ChatMessage(role = ChatMessageRole.SYSTEM, content = "You are a helpful assistant."),
+            ChatMessage(role = ChatMessageRole.USER, content = "Summarize our release notes."),
+        ),
+        model = LLMHubModelID.GEMINI_31_FLASH_LITE,
+        temperature = 0.2,
+        maxTokens = 512,
+    )
+)
+println(completion.firstContent)
+
+// Sugar:
+val reply = client.llmHub.chat(
+    messages = listOf(ChatMessage(role = ChatMessageRole.USER, content = "Hello")),
+    model = LLMHubModelID.RECOMMENDED_DEFAULT,
+)
+```
+
 ## Error handling
 
 `NodeDaError` is a sealed exception hierarchy — catch the specific
@@ -444,7 +474,8 @@ for ready-to-copy examples.
 │       │       ├── newsroom/
 │       │       ├── featureflags/
 │       │       ├── systemstatus/
-│       │       └── legal/
+│       │       ├── legal/
+│       │       └── llmhub/
 │       └── test/kotlin/com/nodeda/sdk/
 │           ├── MockTransport.kt
 │           └── NodeDaClientTest.kt

@@ -94,7 +94,7 @@ class ReleasesViewModel(private val client: NodeDaClient) : ViewModel() {
     }
 
     suspend fun pingEverything() {
-        // Runs all 8 /health endpoints concurrently and returns once they
+        // Runs all 9 /health endpoints concurrently and returns once they
         // all respond — handy at boot for diagnostics dashboards.
         client.healthAll().forEach { (name, health) ->
             Log.i("Health", "$name -> ${health.ok}")

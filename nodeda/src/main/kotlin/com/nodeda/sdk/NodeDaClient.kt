@@ -12,6 +12,7 @@ import com.nodeda.sdk.core.ServiceEndpoints
 import com.nodeda.sdk.distribution.DistributionService
 import com.nodeda.sdk.featureflags.FeatureFlagsService
 import com.nodeda.sdk.legal.LegalService
+import com.nodeda.sdk.llmhub.LLMHubService
 import com.nodeda.sdk.newsroom.NewsroomService
 import com.nodeda.sdk.sales.SalesService
 import com.nodeda.sdk.support.SupportService
@@ -50,6 +51,7 @@ public class NodeDaClient private constructor(
     public val featureFlags: FeatureFlagsService
     public val systemStatus: SystemStatusService
     public val legal: LegalService
+    public val llmHub: LLMHubService
 
     init {
         val orgId = configuration.organizationId
@@ -85,6 +87,10 @@ public class NodeDaClient private constructor(
             http = HttpClient(configuration.endpoints.legalPolicies, configuration, transport),
             orgId = orgId,
         )
+        llmHub = LLMHubService(
+            http = HttpClient(configuration.endpoints.llmHub, configuration, transport),
+            orgId = orgId,
+        )
     }
 
     /**
@@ -102,6 +108,7 @@ public class NodeDaClient private constructor(
             "featureFlags" to async { featureFlags.health() },
             "systemStatus" to async { systemStatus.health() },
             "legal" to async { legal.health() },
+            "llmHub" to async { llmHub.health() },
         )
         tasks.associate { (name, deferred) -> name to deferred.await() }
     }

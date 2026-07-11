@@ -10,9 +10,16 @@ import com.nodeda.sdk.distribution.DistributionArtifactPurpose
 import com.nodeda.sdk.distribution.DistributionChannel
 import com.nodeda.sdk.distribution.DistributionPlatform
 import com.nodeda.sdk.distribution.PublishReleaseRequest
+import com.nodeda.sdk.llmhub.ChatCompletionRequest
+import com.nodeda.sdk.llmhub.ChatMessage
+import com.nodeda.sdk.llmhub.ChatMessageRole
+import com.nodeda.sdk.llmhub.LLMHubModelID
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.double
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -47,6 +54,7 @@ class NodeDaClientTest {
         assertThat(configuration.endpoints.developer.toString().trimEnd('/')).isEqualTo(unified)
         assertThat(configuration.endpoints.systemStatus.toString().trimEnd('/')).isEqualTo(unified)
         assertThat(configuration.endpoints.legalPolicies.toString().trimEnd('/')).isEqualTo(unified)
+        assertThat(configuration.endpoints.llmHub.toString().trimEnd('/')).isEqualTo(unified)
         assertThat(ServiceEndpoints.UNIFIED_API_BASE).isEqualTo(unified)
     }
 
@@ -61,6 +69,7 @@ class NodeDaClientTest {
         assertThat(client.featureFlags).isNotNull()
         assertThat(client.systemStatus).isNotNull()
         assertThat(client.legal).isNotNull()
+        assertThat(client.llmHub).isNotNull()
     }
 
     // -----------------------------------------------------------------------
@@ -278,6 +287,90 @@ class NodeDaClientTest {
             countryCode = "US",
         )
         assertThat(enabled).isTrue()
+    }
+
+    // -----------------------------------------------------------------------
+    // LLM Hub
+    // -----------------------------------------------------------------------
+
+    @Test
+    fun `llm hub createChatCompletion encodes OpenAI body`() = runTest {
+        val orgId = NodeDaConfiguration.DEFAULT_ORGANIZATION_ID
+        val mock = MockTransport { request ->
+            assertThat(request.method).isEqualTo("POST")
+            assertThat(request.url.encodedPath)
+                .isEqualTo("/v1/organizations/$orgId/llm/chat/completions")
+            assertThat(request.header("Authorization")).isEqualTo("Bearer test-key")
+            assertThat(request.header("Content-Type")).isEqualTo("application/json")
+
+            val buffer = Buffer().apply { request.body!!.writeTo(this) }
+            val sent = Json.parseToJsonElement(buffer.readUtf8()).jsonObject
+            assertThat(sent["model"]!!.jsonPrimitive.content).isEqualTo("gemini-3.1-flash-lite")
+            assertThat(sent["temperature"]!!.jsonPrimitive.double).isEqualTo(0.2)
+            assertThat(sent["max_tokens"]!!.jsonPrimitive.int).isEqualTo(512)
+            val messages = sent["messages"]!!.jsonArray
+            assertThat(messages).hasSize(2)
+            assertThat(messages[0].jsonObject["role"]!!.jsonPrimitive.content).isEqualTo("system")
+            assertThat(messages[1].jsonObject["role"]!!.jsonPrimitive.content).isEqualTo("user")
+
+            val json = """
+                {
+                  "id": "chatcmpl_test",
+                  "object": "chat.completion",
+                  "created": 1752240000,
+                  "model": "gemini-3.1-flash-lite",
+                  "choices": [
+                    {
+                      "index": 0,
+                      "message": { "role": "assistant", "content": "Ship it." },
+                      "finish_reason": "stop"
+                    }
+                  ],
+                  "usage": {
+                    "prompt_tokens": 24,
+                    "completion_tokens": 3,
+                    "total_tokens": 27
+                  }
+                }
+            """.trimIndent()
+            json.toByteArray() to 200
+        }
+
+        val client = NodeDaClient(apiKey = "test-key", transport = mock)
+        val completion = client.llmHub.createChatCompletion(
+            ChatCompletionRequest(
+                messages = listOf(
+                    ChatMessage(role = ChatMessageRole.SYSTEM, content = "You are a helpful assistant."),
+                    ChatMessage(role = ChatMessageRole.USER, content = "Summarize our release notes."),
+                ),
+                model = LLMHubModelID.GEMINI_31_FLASH_LITE,
+                temperature = 0.2,
+                maxTokens = 512,
+            ),
+        )
+        assertThat(completion.id).isEqualTo("chatcmpl_test")
+        assertThat(completion.model).isEqualTo("gemini-3.1-flash-lite")
+        assertThat(completion.firstContent).isEqualTo("Ship it.")
+        assertThat(completion.usage?.totalTokens).isEqualTo(27)
+        assertThat(completion.choices.first().finishReason).isEqualTo("stop")
+    }
+
+    @Test
+    fun `llm hub chat sugar posts same endpoint`() = runTest {
+        val orgId = NodeDaConfiguration.DEFAULT_ORGANIZATION_ID
+        val mock = MockTransport { request ->
+            assertThat(request.method).isEqualTo("POST")
+            assertThat(request.url.encodedPath)
+                .isEqualTo("/v1/organizations/$orgId/llm/chat/completions")
+            """{"id":"c1","choices":[{"message":{"role":"assistant","content":"Hi"}}]}"""
+                .toByteArray() to 200
+        }
+
+        val client = NodeDaClient(apiKey = "test-key", transport = mock)
+        val completion = client.llmHub.chat(
+            messages = listOf(ChatMessage(role = ChatMessageRole.USER, content = "Hello")),
+        )
+        assertThat(completion.firstContent).isEqualTo("Hi")
     }
 
     // -----------------------------------------------------------------------

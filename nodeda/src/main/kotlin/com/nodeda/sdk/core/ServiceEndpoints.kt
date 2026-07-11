@@ -8,7 +8,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
  *
  * Production traffic goes through the unified API gateway
  * (`https://api.nodeda.com`). The gateway routes by path prefix
- * (`/v1/organizations/{orgId}/support/`, `/sales/`, …), so every
+ * (`/v1/organizations/{orgId}/support/`, `/sales/`, `/llm/`, …), so every
  * service shares the same host. Per-service fields remain so callers
  * can override individual bases (e.g. staging proxies) without
  * changing the rest of the SDK.
@@ -22,6 +22,7 @@ public data class ServiceEndpoints(
     public val developer: HttpUrl,
     public val systemStatus: HttpUrl,
     public val legalPolicies: HttpUrl,
+    public val llmHub: HttpUrl,
 ) {
     public companion object {
         /** Unified production API gateway (no trailing slash). */
@@ -40,6 +41,7 @@ public data class ServiceEndpoints(
             developer = base,
             systemStatus = base,
             legalPolicies = base,
+            llmHub = base,
         )
     }
 }
