@@ -373,6 +373,25 @@ class NodeDaClientTest {
         assertThat(completion.firstContent).isEqualTo("Hi")
     }
 
+    @Test
+    fun `llm hub omits nil model from wire body`() = runTest {
+        val mock = MockTransport { request ->
+            val buffer = Buffer().apply { request.body!!.writeTo(this) }
+            val sent = Json.parseToJsonElement(buffer.readUtf8()).jsonObject
+            assertThat(sent.containsKey("model")).isFalse()
+            assertThat(sent["messages"]).isNotNull()
+            """{"id":"c2","choices":[{"message":{"role":"assistant","content":"ok"}}]}"""
+                .toByteArray() to 200
+        }
+
+        val client = NodeDaClient(apiKey = "test-key", transport = mock)
+        client.llmHub.createChatCompletion(
+            ChatCompletionRequest(
+                messages = listOf(ChatMessage(role = ChatMessageRole.USER, content = "Hi")),
+            ),
+        )
+    }
+
     // -----------------------------------------------------------------------
     // Manifest loader (analog of the Info.plist tests)
     // -----------------------------------------------------------------------
@@ -461,7 +480,7 @@ class NodeDaClientTest {
     @Test
     fun `SDK version is exposed`() {
         assertThat(NodeDa.VERSION).isNotEmpty()
-        assertThat(NodeDa.VERSION).isEqualTo("1.1")
+        assertThat(NodeDa.VERSION).isEqualTo("1.3")
     }
 
     // -----------------------------------------------------------------------

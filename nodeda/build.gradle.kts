@@ -16,7 +16,7 @@ plugins {
 // ---------------------------------------------------------------------------
 val sdkVersion: String = providers
     .gradleProperty("VERSION_NAME")
-    .getOrElse("1.1")
+    .getOrElse("1.3")
 
 android {
     namespace = "com.nodeda.sdk"

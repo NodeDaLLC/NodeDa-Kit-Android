@@ -1,6 +1,6 @@
 # NodeDa Android
 
-**Current version: `1.1`** &nbsp;·&nbsp; available at runtime as `NodeDa.VERSION`.
+**Current version: `1.3`** &nbsp;·&nbsp; available at runtime as `NodeDa.VERSION`.
 
 The official Android/Kotlin SDK for the **NodeDa** HTTP APIs. One typed
 client, one auth scheme, every public service NodeDa exposes — built on
@@ -23,7 +23,7 @@ val latest = client.distribution.latest(
     channel = DistributionChannel.STABLE,
 )
 println("Latest version: ${latest.artifact.version ?: latest.release.version}")
-println("SDK version: ${NodeDa.VERSION}") // "1.1"
+println("SDK version: ${NodeDa.VERSION}") // "1.3"
 ```
 
 ## Table of contents
@@ -59,7 +59,7 @@ println("SDK version: ${NodeDa.VERSION}") // "1.1"
 
 |                     |                                                |
 | ------------------- | ---------------------------------------------- |
-| **SDK version**     | `1.1`                                          |
+| **SDK version**     | `1.3`                                          |
 | **Runtime constant**| `com.nodeda.sdk.NodeDa.VERSION`                  |
 | **Schema**          | `nrova.distribution.v1` (Distribution API)     |
 
@@ -89,7 +89,7 @@ projects.
 The library is published as a single Maven artifact:
 
 ```text
-com.nodeda:nodeda-android:1.1
+com.nodeda:nodeda-android:1.3
 ```
 
 ### Gradle (Kotlin DSL — `build.gradle.kts`)
@@ -101,7 +101,7 @@ dependency on your app module:
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("com.nodeda:nodeda-android:1.1")
+    implementation("com.nodeda:nodeda-android:1.3")
 }
 ```
 
@@ -109,7 +109,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.nodeda:nodeda-android:1.1'
+    implementation 'com.nodeda:nodeda-android:1.3'
 }
 ```
 
@@ -117,7 +117,7 @@ dependencies {
 
 ```toml
 [versions]
-nodeda = "1.1"
+nodeda = "1.3"
 
 [libraries]
 nodeda-android = { group = "com.nodeda", name = "nodeda-android", version.ref = "nodeda" }
@@ -362,9 +362,36 @@ privacy.sections.forEach { println(it.title) }
 ### LLM Hub API
 
 OpenAI-compatible chat completions via the Vertex LLM Hub gateway
-(Nrova Gemini + optional BYO routing). Requires a developer API key with
-the `llm:invoke` scope (`LLMHubScope.INVOKE`). Omit `model` to use the
-org’s configured default; catalog ids live on `LLMHubModelID`.
+(`https://api.nodeda.com`). Requires a developer API key with the
+`llm:invoke` scope (`LLMHubScope.INVOKE`).
+
+**Server-owned routing:** the gateway picks Nrova Gemini vs BYO from
+Developer → LLM Hub **Routing** (`nrova` | `byo` | `prefer_byo`). Clients
+do not send a provider URL, API key, or routing mode. `model` is an
+optional hint — omit it for the org default (Nrova) or the Custom LLM
+configured model (BYO). Catalog ids for Nrova live on `LLMHubModelID`.
+
+| Method | Endpoint | Scope |
+| --- | --- | --- |
+| `llmHub.health()` | `GET /health` | none |
+| `llmHub.createChatCompletion(request)` | `POST …/llm/chat/completions` | `llm:invoke` |
+| `llmHub.chat(messages, model, temperature, maxTokens)` | `POST …/llm/chat/completions` | `llm:invoke` |
+
+Prefer omitting `model` so Hub defaults apply:
+
+```kotlin
+val completion = client.llmHub.chat(
+    messages = listOf(
+        ChatMessage(role = ChatMessageRole.SYSTEM, content = "You are a helpful assistant."),
+        ChatMessage(role = ChatMessageRole.USER, content = "Summarize our release notes."),
+    ),
+    temperature = 0.2,
+    maxTokens = 512,
+)
+println(completion.firstContent)
+```
+
+Or pass a catalog id when you need a specific Nrova model:
 
 ```kotlin
 val completion = client.llmHub.createChatCompletion(
@@ -376,16 +403,42 @@ val completion = client.llmHub.createChatCompletion(
         model = LLMHubModelID.GEMINI_31_FLASH_LITE,
         temperature = 0.2,
         maxTokens = 512,
-    )
+    ),
 )
 println(completion.firstContent)
 
-// Sugar:
+// Sugar with explicit model:
 val reply = client.llmHub.chat(
     messages = listOf(ChatMessage(role = ChatMessageRole.USER, content = "Hello")),
     model = LLMHubModelID.RECOMMENDED_DEFAULT,
 )
 ```
+
+Gateway error codes (via `NodeDaError.Api`): `hub_disabled`,
+`model_not_found`, `byo_not_configured`, `byo_not_ready`,
+`byo_model_missing`, `spend_cap_reached`, `upstream_unavailable`,
+`upstream_error`, `upstream_timeout`, `insufficient_scope`.
+
+#### Catalog model ids (`LLMHubModelID`)
+
+| Constant | Wire id | Notes |
+| --- | --- | --- |
+| `GEMINI_31_FLASH_LITE` | `gemini-3.1-flash-lite` | Recommended default (`RECOMMENDED_DEFAULT`) |
+| `GEMINI_25_FLASH` | `gemini-2.5-flash` | Balanced production Flash |
+| `GEMINI_25_PRO` | `gemini-2.5-pro` | Stronger reasoning; elevated rates above 200k input |
+| `GEMINI_3_FLASH_PREVIEW` | `gemini-3-flash-preview` | Frontier Flash preview |
+| `GEMINI_35_FLASH` | `gemini-3.5-flash` | Highest Flash-class intelligence |
+
+#### Request / response
+
+Request encodes `maxTokens` as wire `max_tokens`. Nil optionals are
+**omitted** from the JSON body (`encodeDefaults = false`). Response fields use
+snake_case on the wire and camelCase in Kotlin (`promptTokens`,
+`finishReason`). Prefer `ChatCompletionResponse.firstContent` for the
+assistant string.
+
+v1 does **not** include streaming, tools/function calling, or multimodal
+content arrays — text chat completions only.
 
 ## Error handling
 
@@ -517,7 +570,7 @@ GPG, and produces sources + Javadoc jars. Three one-time setup steps:
 Edit `gradle.properties`:
 
 ```properties
-VERSION_NAME=1.2.0
+VERSION_NAME=1.3
 ```
 
 `NodeDa.VERSION` is regenerated automatically at build time so the
@@ -556,8 +609,8 @@ signingInMemoryKeyPassword=your-gpg-passphrase
 Tag the commit and push:
 
 ```bash
-git tag -a v1.2.0 -m "Release 1.2.0"
-git push origin v1.2.0
+git tag -a v1.3 -m "Release 1.3"
+git push origin v1.3
 ```
 
 ### Publishing to GitHub Packages instead

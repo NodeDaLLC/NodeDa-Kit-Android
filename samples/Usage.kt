@@ -3,7 +3,7 @@
  * part of the library — it's a reference snippet you can paste into your own
  * Android app. The full project lives at:
  *
- *     com.nodeda:nodeda-android:1.1
+ *     com.nodeda:nodeda-android:1.3
  */
 package com.example.nodedasample
 
@@ -17,6 +17,8 @@ import com.nodeda.sdk.core.NodeDaError
 import com.nodeda.sdk.distribution.DistributionChannel
 import com.nodeda.sdk.distribution.DistributionPlatform
 import com.nodeda.sdk.featureflags.EvaluateFlagsRequest
+import com.nodeda.sdk.llmhub.ChatMessage
+import com.nodeda.sdk.llmhub.ChatMessageRole
 import com.nodeda.sdk.support.CreateSupportTicketRequest
 import com.nodeda.sdk.support.SupportCategory
 import com.nodeda.sdk.support.SupportPriority
@@ -77,6 +79,21 @@ class ReleasesViewModel(private val client: NodeDaClient) : ViewModel() {
                     environment = "production",
                 )
             )
+        }
+    }
+
+    fun askLlmHub() {
+        viewModelScope.launch {
+            // Prefer omitting model — Hub / BYO defaults apply on the server.
+            val completion = client.llmHub.chat(
+                messages = listOf(
+                    ChatMessage(role = ChatMessageRole.SYSTEM, content = "You are a helpful assistant."),
+                    ChatMessage(role = ChatMessageRole.USER, content = "Summarize our release notes."),
+                ),
+                temperature = 0.2,
+                maxTokens = 512,
+            )
+            Log.i("LLMHub", completion.firstContent ?: "(empty)")
         }
     }
 

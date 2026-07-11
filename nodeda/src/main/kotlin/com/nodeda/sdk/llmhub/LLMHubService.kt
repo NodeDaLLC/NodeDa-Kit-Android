@@ -7,21 +7,21 @@ import com.nodeda.sdk.core.HttpClient
  * Client for the **NodeDa Vertex LLM Hub API**
  * (`https://api.nodeda.com` — path prefix `/v1/organizations/{orgId}/llm/`).
  *
- * OpenAI-compatible chat completions with metered Nrova Gemini routing
- * and optional BYO provider routing. Requires a developer API key with
- * the [LLMHubScope.INVOKE] (`llm:invoke`) scope.
+ * OpenAI-compatible chat completions. The **server** chooses the upstream
+ * (Nrova Gemini vs BYO) from Developer → LLM Hub `routingMode`
+ * (`nrova` | `byo` | `prefer_byo`). Clients keep the same request shape;
+ * `model` is an optional hint. Requires a developer API key with the
+ * [LLMHubScope.INVOKE] (`llm:invoke`) scope.
  *
  * ```kotlin
- * val completion = client.llmHub.createChatCompletion(
- *     ChatCompletionRequest(
- *         messages = listOf(
- *             ChatMessage(role = ChatMessageRole.SYSTEM, content = "You are a helpful assistant."),
- *             ChatMessage(role = ChatMessageRole.USER, content = "Summarize our release notes."),
- *         ),
- *         model = LLMHubModelID.GEMINI_31_FLASH_LITE,
- *         temperature = 0.2,
- *         maxTokens = 512,
- *     )
+ * // Prefer omitting model — Hub / BYO defaults apply.
+ * val completion = client.llmHub.chat(
+ *     messages = listOf(
+ *         ChatMessage(role = ChatMessageRole.SYSTEM, content = "You are a helpful assistant."),
+ *         ChatMessage(role = ChatMessageRole.USER, content = "Summarize our release notes."),
+ *     ),
+ *     temperature = 0.2,
+ *     maxTokens = 512,
  * )
  * println(completion.firstContent)
  * ```
